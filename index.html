@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اختباري - اعرف ياقوت</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background: url('https://images.unsplash.com/photo-1532274402917-5aadf881bdfb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      backdrop-filter: brightness(30%) blur(3px);
+      padding: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      margin: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    h1, h2 {
+      margin-bottom: 20px;
+    }
+
+    button, .option {
+      padding: 10px 20px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background-color: #ffffff10;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 100%;
+    }
+
+    .option:hover, button:hover {
+      background-color: #ffffff30;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <div id="start-screen" class="card">
+      <h1>اختباري</h1>
+      <p>اختبار: قد إيه تعرف ياقوت؟</p>
+      <input id="username" type="text" placeholder="اكتب اسمك" style="padding:10px; border-radius:10px; width:100%; border:none; margin-bottom:20px;">
+      <button onclick="startQuiz()">ابدأ</button>
+    </div>
+    <div id="question-screen" class="card hidden">
+      <h2 id="question-text"></h2>
+      <div id="options"></div>
+    </div>
+    <div id="result-screen" class="card hidden">
+      <h2 id="result-text"></h2>
+      <button onclick="location.reload()">العب تاني</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "أكتر حاجة ياقوت بيحب يعملها لما يكون فاضي؟", a: "فيديو جيمز", options: ["أنام", "فيديو جيمز", "أتفرج على فيلم", "أنزل أتمشى"] },
+      { q: "إيه أكتر أكلة ياقوت بيحبها؟", a: "البشاميل", options: ["البشاميل", "الكشري", "السمك", "المحشي"] },
+      { q: "إيه أكتر لون ياقوت بيحبه؟", a: "الأسود", options: ["أبيض", "أسود", "أحمر", "أزرق"] },
+      { q: "نوع الأغاني اللي ياقوت بيحبها أكتر؟", a: "حزين", options: ["رومانسي", "حزين", "مش بحب الأغاني"] },
+      { q: "مين الفنان المفضل عند ياقوت؟", a: "سانتا", options: ["عمرو دياب", "إليسا", "سانتا", "اليوسف"] },
+      { q: "مين لاعب الكورة المفضل عند ياقوت؟", a: "ديبروين", options: ["ديبروين", "محمد صلاح", "كريستيانو", "نيمار"] },
+      { q: "أكتر وقت ياقوت بيحب يقعد فيه لوحده؟", a: "بالليل", options: ["الصبح بدري", "بعد الفطار", "بالليل", "مش بيحب يقعد لوحده"] },
+      { q: "ياقوت بيشرب إيه؟", a: "شاي بالنعناع", options: ["قهوة", "شاي بالنعناع", "عصير مانجا", "عصير ليمون"] },
+      { q: "إيه أكتر نوع أفلام ياقوت بيحب يتفرج عليه؟", a: "أكشن", options: ["أكشن", "رومانسي", "رعب", "كوميدي"] },
+      { q: "أكتر حاجة ممكن تزعّل ياقوت؟", a: "الكذب", options: ["الكذب", "التجاهل", "النقد", "المقارنة بالناس"] },
+      { q: "ياقوت يفضل الشتاء ولا الصيف؟", a: "شتاء", options: ["شتاء", "صيف", "ملوش في الجو", "بيحب الاتنين"] },
+      { q: "ياقوت بيحب يتكلم عن نفسه؟", a: "لأ", options: ["آه", "لأ", "بس لو مرتاح", "نادرًا"] },
+      { q: "إيه أكتر حاجة ياقوت بيضيع فيها وقته؟", a: "سوشيال ميديا", options: ["سوشيال ميديا", "أكل", "نوم", "تفكير"] }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let playerName = "";
+
+    function startQuiz() {
+      const input = document.getElementById('username');
+      if (input.value.trim() === "") return alert("اكتب اسمك الأول");
+      playerName = input.value.trim();
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('question-screen').classList.remove('hidden');
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('question-text').innerText = q.q;
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = "";
+      q.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.innerText = option;
+        btn.className = 'option';
+        btn.onclick = () => handleAnswer(option);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selected) {
+      const correct = questions[currentQuestion].a;
+      if (selected === correct) score++;
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('question-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+      let result = "";
+      if (score <= 4) {
+        result = `يا ${playerName}... إنت متعرفش ياقوت خالص 💀`;
+      } else if (score <= 9) {
+        result = `يا ${playerName}... يعني نص نص، محتاج تتقربله 😬`;
+      } else if (score <= 12) {
+        result = `يا ${playerName}... إنت عارفه كويس جدًا 💪`;
+      } else {
+        result = `يا ${playerName}... إنت عشرة ياقوت 💎🔥`;
+      }
+      document.getElementById('result-text').innerText = result;
+    }
+  </script>
+</body>
+</html>
