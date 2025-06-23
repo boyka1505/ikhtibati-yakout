@@ -13,7 +13,13 @@
   font-family: 'Cairo', sans-serif;
 }
 
+
 body {
+  background-image: url('bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   margin: 0;
   background-color: #0e0e0e;
   color: white;
@@ -95,7 +101,13 @@ input[type="text"] {
   display: none;
 }
 
-    body {
+    
+body {
+  background-image: url('bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
       margin: 0;
       font-family: 'Cairo', sans-serif;
       background: url('https://images.unsplash.com/photo-1532274402917-5aadf881bdfb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
@@ -153,9 +165,29 @@ input[type="text"] {
     .hidden {
       display: none;
     }
-  </style>
+  
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.question-card {
+  animation: fadeIn 0.5s ease-in-out;
+}
+</style>
+
 </head>
+
 <body>
+
+<div id="start-screen" class="container" style="text-align:center; padding-top:30vh; animation: fadeIn 2s;">
+  <h1 style="font-size: 3em; color: #ff3333;">🧠 اختباري</h1>
+  <p style="color: #ccc; margin-top: 10px;">هل تعرف ياقوت فعلاً؟</p>
+  <button class="btn" onclick="startQuiz()" style="margin-top: 30px;">ابدأ الاختبار</button>
+</div>
+
+  <audio id="correct-sound" src="correct.mp3"></audio>
+  <audio id="wrong-sound" src="wrong.mp3"></audio>
+
   <div id="app" class="container">
     <div id="start-screen" class="card">
       <h1>اختباري</h1>
@@ -173,7 +205,31 @@ input[type="text"] {
     </div>
   </div>
 
-  <script>
+  
+
+<script>
+function startQuiz() {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('start-container').classList.remove('hidden');
+}
+
+// منع إعادة الاختبار
+window.onload = () => {
+  const done = localStorage.getItem("quiz_done");
+  const savedResult = localStorage.getItem("quiz_result");
+  if (done && savedResult) {
+    document.body.innerHTML = `
+      <div class="container">
+        <div class="card">
+          <h2>انت خلاص جاوبت الاختبار ✅</h2>
+          <p>${savedResult}</p>
+          <p style="color:gray">ماتقدرش تعيده تاني 😎</p>
+        </div>
+      </div>
+    `;
+  }
+};
+
     const questions = [
       { q: "أكتر حاجة ياقوت بيحب يعملها لما يكون فاضي؟", a: "فيديو جيمز", options: ["أنام", "فيديو جيمز", "أتفرج على فيلم", "أنزل أتمشى"] },
       { q: "إيه أكتر أكلة ياقوت بيحبها؟", a: "البشاميل", options: ["البشاميل", "الكشري", "السمك", "المحشي"] },
@@ -223,12 +279,61 @@ input[type="text"] {
       currentQuestion++;
       if (currentQuestion < questions.length) {
         loadQuestion();
-      } else {
+      } 
+else {
+    document.getElementById('wrong-sound').play();
+
         showResult();
       }
     }
 
-    function showResult() {
+    
+function showResult() {
+  document.getElementById('question-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.remove('hidden');
+
+  let result = "";
+  if (score <= 4) {
+    result = `يا ${playerName}... إنت متعرفش ياقوت خالص 💀`;
+  } else if (score <= 9) {
+    result = `يا ${playerName}... يعني نص نص، محتاج تتقربله 😬`;
+  } else if (score <= 12) {
+    result = `يا ${playerName}... إنت عارفه كويس جدًا 💪`;
+  } else {
+    result = `يا ${playerName}... إنت عشرة ياقوت 💎🔥`;
+  }
+
+  document.getElementById('result-text').innerText = result;
+
+  
+// حفظ النتيجة ومنع الإعادة
+localStorage.setItem("quiz_done", "true");
+localStorage.setItem("quiz_result", result);
+
+// إرسال النتيجة إلى Google Form
+
+  const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSel0cJ6mOI-D0mUdgeHpgtxfa_AqR81VjhB5p5g5_b2qx6AXQ/formResponse?";
+  const fullNameAndScore = `${playerName} - ${score} من ${questions.length}`;
+  fetch(formUrl + `entry.1369585106=${encodeURIComponent(fullNameAndScore)}`, { method: "POST", mode: "no-cors" });
+
+  // عرض الأسئلة مع إجابات المستخدم
+  const detailedDiv = document.getElementById('detailed-result');
+  detailedDiv.innerHTML = "";
+  userAnswers.forEach((answer, index) => {
+    const q = questions[index];
+    const isCorrect = answer === q.answer;
+    detailedDiv.innerHTML += `
+      <div style="text-align:right; margin-bottom:15px;">
+        <strong>سؤال ${index + 1}:</strong> ${q.question}<br>
+        <span style="color:${isCorrect ? 'lightgreen' : 'orangered'}">🔸 إجابتك: ${answer}</span><br>
+        <span style="color:lightblue">✔️ الإجابة الصحيحة: ${q.answer}</span>
+      </div>
+    `;
+  });
+}
+- ${score} من ${questions.length}`;
+  fetch(formUrl + `entry.1369585106=${encodeURIComponent(fullNameAndScore)}`, { method: "POST", mode: "no-cors" });
+
       document.getElementById('question-screen').classList.add('hidden');
       document.getElementById('result-screen').classList.remove('hidden');
       let result = "";
@@ -238,11 +343,50 @@ input[type="text"] {
         result = `يا ${playerName}... يعني نص نص، محتاج تتقربله 😬`;
       } else if (score <= 12) {
         result = `يا ${playerName}... إنت عارفه كويس جدًا 💪`;
-      } else {
+      } 
+else {
+    document.getElementById('wrong-sound').play();
+
         result = `يا ${playerName}... إنت عشرة ياقوت 💎🔥`;
       }
       document.getElementById('result-text').innerText = result;
     }
-  </script>
+  
+function showLeaderboard() {
+  document.getElementById("result-screen").classList.add("hidden");
+  document.getElementById("leaderboard-screen").classList.remove("hidden");
+
+  const leaderboardData = [
+    { name: "سارة", score: 15 },
+    { name: "علي", score: 13 },
+    { name: "أحمد", score: 12 },
+    { name: "نور", score: 10 },
+    { name: playerName, score: score }
+  ];
+
+  leaderboardData.sort((a, b) => b.score - a.score);
+
+  const list = document.getElementById("leaderboard-list");
+  list.innerHTML = "";
+  leaderboardData.forEach((entry, index) => {
+    list.innerHTML += `<li style="margin: 5px 0;">${index + 1}. ${entry.name} - ${entry.score} نقطة</li>`;
+  });
+}
+
+function goBackToResult() {
+  document.getElementById("leaderboard-screen").classList.add("hidden");
+  document.getElementById("result-screen").classList.remove("hidden");
+}
+
+</script>
+
+<div id="leaderboard-screen" class="container hidden" style="text-align: right;">
+  <div class="card">
+    <h2>👑 الترتيب</h2>
+    <ul id="leaderboard-list" style="list-style: none; padding: 0;"></ul>
+    <button class="btn" onclick="goBackToResult()">⬅️ ارجع للنتيجة</button>
+  </div>
+</div>
+
 </body>
 </html>
