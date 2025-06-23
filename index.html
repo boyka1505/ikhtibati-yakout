@@ -183,6 +183,7 @@ body {
   <h1 style="font-size: 3em; color: #ff3333;">🧠 اختباري</h1>
   <p style="color: #ccc; margin-top: 10px;">هل تعرف ياقوت فعلاً؟</p>
   <button class="btn" onclick="startQuiz()" style="margin-top: 30px;">ابدأ الاختبار</button>
+    <button class="btn" onclick="showSavedResult()" style="margin-top: 10px;">📊 عرض نتيجتي</button>
 </div>
 
   <audio id="correct-sound" src="correct.mp3"></audio>
@@ -217,7 +218,21 @@ function startQuiz() {
 window.onload = () => {
   const done = localStorage.getItem("quiz_done");
   const savedResult = localStorage.getItem("quiz_result");
-  if (done && savedResult) {
+  
+if (done && savedResult) {
+  document.getElementById('start-screen').classList.remove('hidden');
+  document.getElementById('start-screen').innerHTML += `
+    <div class="card" style="margin-top:20px;">
+      <h3>📊 نتيجتك السابقة:</h3>
+      <p>${savedResult}</p>
+    </div>
+  `;
+  document.getElementById('start-container').classList.add('hidden');
+  document.getElementById('question-screen').classList.add('hidden');
+  document.getElementById('result-screen').classList.add('hidden');
+  document.getElementById('leaderboard-screen').classList.add('hidden');
+}
+
     document.body.innerHTML = `
       <div class="container">
         <div class="card">
@@ -378,7 +393,21 @@ function goBackToResult() {
   document.getElementById("result-screen").classList.remove("hidden");
 }
 
+
+function showSavedResult() {
+  const result = localStorage.getItem("quiz_result") || "مفيش نتيجة محفوظة";
+  document.body.innerHTML = `
+    <div class="container">
+      <div class="card">
+        <h2>📊 نتيجتك</h2>
+        <p>${result}</p>
+        <button class="btn" onclick="window.location.reload()">🔄 ارجع</button>
+      </div>
+    </div>
+  `;
+}
 </script>
+
 
 <div id="leaderboard-screen" class="container hidden" style="text-align: right;">
   <div class="card">
