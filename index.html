@@ -179,6 +179,15 @@ body {
 
 <body>
 
+
+<div id="name-screen" class="container hidden" style="text-align:center;">
+  <div class="card">
+    <h2>👋 عرفنا بنفسك</h2>
+    <input type="text" id="name-input" placeholder="اكتب اسمك" style="padding:10px; margin-top: 10px; border-radius: 8px; border:none; width: 80%; max-width: 300px;"><br>
+    <button class="btn" onclick="submitName()" style="margin-top: 15px;">استمرار</button>
+  </div>
+</div>
+
 <div id="start-screen" class="container" style="text-align:center; padding-top:30vh; animation: fadeIn 2s;">
   <h1 style="font-size: 3em; color: #ff3333;">🧠 اختباري</h1>
   <p style="color: #ccc; margin-top: 10px;">هل تعرف ياقوت فعلاً؟</p>
@@ -209,22 +218,35 @@ body {
   
 
 <script>
+
 function startQuiz() {
   document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('start-container').classList.remove('hidden');
+  document.getElementById('name-screen').classList.remove('hidden');
 }
 
+
 // منع إعادة الاختبار
+
 window.onload = () => {
   const done = localStorage.getItem("quiz_done");
   const savedResult = localStorage.getItem("quiz_result");
-  
-if (done && savedResult) {
-  document.getElementById('start-screen').classList.remove('hidden');
-  document.getElementById('start-screen').innerHTML += `
-    <div class="card" style="margin-top:20px;">
-      <h3>📊 نتيجتك السابقة:</h3>
-      <p>${savedResult}</p>
+
+  if (done && savedResult) {
+    const resultCard = `
+      <div class="card" style="margin-top:20px;">
+        <h3>📊 نتيجتك السابقة:</h3>
+        <p>${savedResult}</p>
+      </div>
+    `;
+    document.getElementById('start-screen').classList.remove('hidden');
+    document.getElementById('start-screen').innerHTML += resultCard;
+    document.getElementById('start-container').classList.add('hidden');
+    document.getElementById('question-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.add('hidden');
+    document.getElementById('leaderboard-screen').classList.add('hidden');
+  }
+};
+</p>
     </div>
   `;
   document.getElementById('start-container').classList.add('hidden');
@@ -265,14 +287,12 @@ if (done && savedResult) {
     let score = 0;
     let playerName = "";
 
-    function startQuiz() {
-      const input = document.getElementById('username');
-      if (input.value.trim() === "") return alert("اكتب اسمك الأول");
-      playerName = input.value.trim();
-      document.getElementById('start-screen').classList.add('hidden');
-      document.getElementById('question-screen').classList.remove('hidden');
-      loadQuestion();
-    }
+    
+function startQuiz() {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('name-screen').classList.remove('hidden');
+}
+
 
     function loadQuestion() {
       const q = questions[currentQuestion];
@@ -406,6 +426,18 @@ function showSavedResult() {
     </div>
   `;
 }
+
+function submitName() {
+  const input = document.getElementById("name-input").value.trim();
+  if (!input) {
+    alert("من فضلك اكتب اسمك الأول");
+    return;
+  }
+  playerName = input;
+  document.getElementById("name-screen").classList.add("hidden");
+  document.getElementById("start-container").classList.remove("hidden");
+}
+
 </script>
 
 
